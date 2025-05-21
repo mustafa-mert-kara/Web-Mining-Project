@@ -12,15 +12,13 @@ class OutputPanel(ttk.Frame):
         self.width=width
         self.height=height
         self.parent=parent
-        # self.data_frame=ttk.Frame(self,height=1000)
-        # self.data_frame.grid(row=0,column=0,sticky="NS",)
-        # self.rowconfigure(0, weight=1)
+        
         self.create_data_view()
 
 
     def create_data_view(self):
         dataset=self.parent.get_selected_dataset()
-        dataset_name,path=dataset.split("--")
+        _,path=dataset.split("--")
         columns=DataHandler.return_columns(path=path)
         self.table = ttk.Treeview(self, columns = list(columns), show = 'headings')
         for col in columns:

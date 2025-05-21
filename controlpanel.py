@@ -14,7 +14,7 @@ class ControlPanel(ttk.Frame):
 
         self.custom_inputs=[]
         self.input_frames=[]
-        # self.columnconfigure(30,minsize=100)
+
         with open('model_registry.json', 'r') as file:
             self.models_json=json.load(file)
             self.models=self.create_strings_from_json(self.models_json)
@@ -39,7 +39,7 @@ class ControlPanel(ttk.Frame):
 
     
     def create_input_comps(self):
-        def combox_event(eventObject):
+        def combox_event(event_object):
             self.create_input_selection()
             self.parent.notify_new_dataset()
         parent=ttk.Frame(self)
@@ -81,8 +81,7 @@ class ControlPanel(ttk.Frame):
             frame.columnconfigure(0, weight=1)
             frame.grid_propagate(False)
             self.input_frames.append(frame)
-            # frame=ttk.Frame(self)
-            # frame.grid(row=2,column=i)
+            
 
             i+=1
             if val !=self.datasets_json[name]["label"]:
@@ -99,9 +98,9 @@ class ControlPanel(ttk.Frame):
         self.predict_custom.grid(row=2,column=i) 
 
 
-    def create_column_sections(self,parent,value,isitLabel=False):
+    def create_column_sections(self,parent,value,is_it_label=False):
         ttk.Label(parent,text=value).grid(row=0,column=0)
-        if isitLabel==False:
+        if is_it_label==False:
             inputbox=ttk.Entry(parent)
             inputbox.grid(row=1,column=0)
             self.custom_inputs.append(inputbox)
