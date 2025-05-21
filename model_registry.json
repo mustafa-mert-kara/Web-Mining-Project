@@ -1,0 +1,6 @@
+{
+    "decision_tree":{"path":"models/decision_tree"},
+    "naive_bayes":{"path":"models/naive_bayes"},
+    "mlp":{"path":"models/mlp"},
+    "xgboost":{"path":"models/xgboost"}    
+}

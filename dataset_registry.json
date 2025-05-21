@@ -1,0 +1,12 @@
+{
+    "Raw-Processed-CSV":{"path":"datasets/Processed.csv",
+    "label":"Label"},
+    "Raw-Processed":{"path":"datasets/Processed.xlsx",
+    "label":"Label"},
+    "all_datasets":{"path":"datasets/all_data.csv",
+    "label":"Label"},
+    "train_data":{"path":"datasets/train_data.csv",
+    "label":"Label"},
+    "test_data":{"path":"datasets/test_data.csv",
+    "label":"Label"}
+}
