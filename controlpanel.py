@@ -3,6 +3,9 @@ from tkinter import ttk
 import tkinter.font as TkFont
 import json
 from datahandler import DataHandler
+from modelhandler import Model
+import numpy as np
+import pandas as pd
 
 class ControlPanel(ttk.Frame):
     def __init__(self, parent, tag,width,height):
@@ -27,6 +30,7 @@ class ControlPanel(ttk.Frame):
         self.create_input_comps()
         ttk.Frame(self).grid(row=1,column=0)
         self.create_input_selection()
+        self.load_model()
 
 
 
@@ -42,12 +46,17 @@ class ControlPanel(ttk.Frame):
         def combox_event(event_object):
             self.create_input_selection()
             self.parent.notify_new_dataset()
+        def model_combobox_event(event_object):
+            self.load_model()
         parent=ttk.Frame(self)
         parent.grid(row=0,column=0,sticky="W")
         start=0
         input_box_colspan=5
         self.model_options=ttk.Combobox(parent,value=self.models,width=len(max(self.models,key=len)), state='readonly')       
+        self.model_options.bind("<<ComboboxSelected>>", model_combobox_event)
+        self.model_options.current(0)
         self.model_options.grid(row=0,column=start,columnspan=input_box_colspan)
+        
         start+=input_box_colspan+1
         model_add=ttk.Button(parent,text="Add Model")
         model_add.grid(row=0,column=start)
@@ -94,7 +103,7 @@ class ControlPanel(ttk.Frame):
         self.input_frames.append(frame)   
         self.create_column_sections(frame,self.datasets_json[name]["label"],True) 
 
-        self.predict_custom=ttk.Button(parent,text="Predict")
+        self.predict_custom=ttk.Button(parent,text="Predict",command=self.predict_input)
         self.predict_custom.grid(row=2,column=i) 
 
 
@@ -126,8 +135,58 @@ class ControlPanel(ttk.Frame):
         self.custom_inputs[-1].insert(0,val)
         self.custom_inputs[-1].configure(state="disabled")
         
-    
+    def load_model(self):
+        _,path=str(self.model_options.get()).split("--")
+        self.Model=Model.load_model(path)
+    def predict_input(self):
+        name,model_path=str(self.model_options.get()).split("--")
+        print("Name of the Model: ",name)
+        cols=self.models_json[name]["cols"]
+        _,path=str(self.data_options.get()).split("--")
+        data_columns=DataHandler.return_columns(path)
+        if "keras" in model_path:
+            input_vector=self.prepare_keras_input(cols,data_columns,self.models_json[name]["input"])
+        else:
+            input_vector=self.prepare_scikit_input(cols,data_columns)
+        print("Input Vec:",input_vector)
+        pred=self.Model(input_vector)
+        print("Prediction Result: ",pred)
 
+    def prepare_keras_input(self,cols,data_columns,dict_keys):
+        input_vector={}
+        for col in cols:
+            try:
+                print("Column Searched: ",col," In: ",data_columns)
+                indx=list(data_columns).index(col)
+                print("Column Found Index: ",indx)
+                val=self.custom_inputs[indx].get()
+                print("val from input: ",val)
+                if "." in val:
+                    input_vector[dict_keys[col]]=np.asarray([float(val)])
+                else:
+                    input_vector[dict_keys[col]]=np.asarray([int(val)])
+            except:
+                print("column not found")
+                exit()
+        print("Shape: ",input_vector["network"].shape)
+        return input_vector
+    def prepare_scikit_input(self,cols,data_columns):
+        input_vector=[]
+        for col in cols:
+            try:
+                print("Column Searched: ",col," In: ",data_columns)
+                indx=list(data_columns).index(col)
+                print("Column Found Index: ",indx)
+                val=self.custom_inputs[indx].get()
+                print("val from input: ",val)
+                if "." in val:
+                    input_vector.append(float(val))
+                else:
+                    input_vector.append(int(val))
+            except:
+                print("column not found")
+                exit()
+        return input_vector
         
 
              

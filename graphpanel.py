@@ -10,5 +10,12 @@ class GraphPanel(ttk.Frame):
         self.height=height
         self.parent=parent
 
+        # frame=ttk.Frame(self,width=width,height=height)
+        # frame.grid(row=0,column=0,sticky="NSE")
+        # self.predict_all=ttk.Button(frame,text="Predict All",command=self.predict_all)
+        # self.predict_all.pack()
+
+    def predict_all(self):
+        return
              
        
