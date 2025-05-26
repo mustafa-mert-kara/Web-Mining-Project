@@ -18,8 +18,8 @@ class OutputPanel(ttk.Frame):
 
 
     def create_data_view(self):
-        dataset=self.parent.get_selected_dataset()
-        _,path=dataset.split("--")
+        dataset_str=self.parent.get_selected_dataset()
+        _,path=dataset_str.split("--")
         columns=DataHandler.return_columns(path=path)
         self.table = ttk.Treeview(self, columns = list(columns), show = 'headings')
         for col in columns:
@@ -38,9 +38,9 @@ class OutputPanel(ttk.Frame):
         self.verscrlbar.pack(side ='right', fill ='y',expand=True)
         
 
-        dataset=DataHandler.import_data(path)
+        self.dataset=DataHandler.import_data(path)
 
-        for _,row in dataset.iterrows():
+        for _,row in self.dataset.iterrows():
             self.table.insert("","end",values=list(row))
 
         def item_select(_):
@@ -59,3 +59,5 @@ class OutputPanel(ttk.Frame):
         self.destroy_table()
         self.create_data_view()
         
+    def return_dataset(self):
+        return self.dataset

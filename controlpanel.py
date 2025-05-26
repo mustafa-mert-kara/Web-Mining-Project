@@ -6,7 +6,10 @@ from datahandler import DataHandler
 from modelhandler import Model
 import numpy as np
 import pandas as pd
-
+from sklearn.metrics import accuracy_score,confusion_matrix,f1_score,roc_auc_score,roc_curve,auc,RocCurveDisplay,ConfusionMatrixDisplay,PrecisionRecallDisplay
+import matplotlib.pyplot as plt
+from graphpanel import GraphPanel
+import time
 class ControlPanel(ttk.Frame):
     def __init__(self, parent, tag,width,height):
         tk.Frame.__init__(self, parent,width=width, height=height,background="white")
@@ -58,16 +61,16 @@ class ControlPanel(ttk.Frame):
         self.model_options.grid(row=0,column=start,columnspan=input_box_colspan)
         
         start+=input_box_colspan+1
-        model_add=ttk.Button(parent,text="Add Model")
-        model_add.grid(row=0,column=start)
-        start+=1
+        # model_add=ttk.Button(parent,text="Add Model")
+        # model_add.grid(row=0,column=start)
+        # start+=1
         self.data_options=ttk.Combobox(parent,values=self.datasets,width=len(max(self.datasets,key=len)), state='readonly')
         self.data_options.current(0)
         self.data_options.grid(row=0,column=start,columnspan=input_box_colspan)
         self.data_options.bind("<<ComboboxSelected>>", combox_event)
-        data_add=ttk.Button(parent,text="Add Dataset")
-        start+=input_box_colspan+1
-        data_add.grid(row=0,column=start)
+        # data_add=ttk.Button(parent,text="Add Dataset")
+        # start+=input_box_colspan+1
+        # data_add.grid(row=0,column=start)
     
         
 
@@ -103,8 +106,11 @@ class ControlPanel(ttk.Frame):
         self.input_frames.append(frame)   
         self.create_column_sections(frame,self.datasets_json[name]["label"],True) 
 
-        self.predict_custom=ttk.Button(parent,text="Predict",command=self.predict_input)
+        self.predict_custom=ttk.Button(parent,text="Predict Custom",command=self.predict_input)
         self.predict_custom.grid(row=2,column=i) 
+
+        self.predict_All=ttk.Button(parent,text="Predict All Dataset",command=self.predict_dataset)
+        self.predict_All.grid(row=2,column=i+1) 
 
 
     def create_column_sections(self,parent,value,is_it_label=False):
@@ -138,6 +144,42 @@ class ControlPanel(ttk.Frame):
     def load_model(self):
         _,path=str(self.model_options.get()).split("--")
         self.Model=Model.load_model(path)
+
+    def predict_dataset(self):
+        dataset=self.parent.return_dataset()
+        model_name,model_path=str(self.model_options.get()).split("--")
+        cols=self.models_json[model_name]["cols"]
+        
+        if "keras" in model_path:
+
+            dict_keys=self.models_json[model_name]["input"]
+            input_vector={}
+            for col in cols:
+                input_vector[dict_keys[col]]=dataset.loc[:,col]
+            
+
+        else:            
+            input_vector=dataset.loc[:,cols]
+        preds=self.Model(input_vector)
+    
+        dataset_name,_=str(self.data_options.get()).split("--")
+        y_test=dataset.loc[:,self.datasets_json[dataset_name]["label"]].to_numpy().reshape((-1,1))
+        
+        cm = confusion_matrix(y_test, preds)
+        fpr, tpr, thresholds = roc_curve(y_test, preds)
+        roc_auc = auc(fpr, tpr)
+        RocCurve=RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc,
+
+                                  estimator_name=f"{model_name}")
+        results={"model":model_name,"acc":accuracy_score(y_test,preds),"f1":f1_score(y_test,preds),"roc":roc_auc_score(y_test,preds),"cm":cm,"roc_curve":RocCurve}
+        
+        
+        output_panel=GraphPanel(results)
+        self.parent.wait_window(output_panel)
+        # output_panel.mainloop()
+        # disp.plot(cmap=plt.cm.Blues)
+        # plt.show()
+
     def predict_input(self):
         name,model_path=str(self.model_options.get()).split("--")
         print("Name of the Model: ",name)
@@ -151,6 +193,15 @@ class ControlPanel(ttk.Frame):
         print("Input Vec:",input_vector)
         pred=self.Model(input_vector)
         print("Prediction Result: ",pred)
+        def set_var():
+            self.custom_inputs[-1].configure(state="enabled")
+            self.custom_inputs[-1].insert(0,pred[0])
+            self.custom_inputs[-1].configure(state="disabled")
+        self.custom_inputs[-1].configure(state="enabled")
+        self.custom_inputs[-1].delete(0, 'end')
+        self.custom_inputs[-1].configure(state="disabled")
+        self.parent.after(1000,set_var)
+        
 
     def prepare_keras_input(self,cols,data_columns,dict_keys):
         input_vector={}
@@ -186,7 +237,7 @@ class ControlPanel(ttk.Frame):
             except:
                 print("column not found")
                 exit()
-        return input_vector
+        return np.array(input_vector).reshape((1,-1))
         
 
              

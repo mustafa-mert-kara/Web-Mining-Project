@@ -10,7 +10,7 @@ class Model:
             
             def predict_keras(input_vec):
                     
-                    pred=model.predict(input_vec)
+                    pred=model.predict(input_vec,batch_size=1024)
                     return list(map(lambda x: int(x[0][0]),(pred>=0.5)))
             
             return predict_keras
@@ -18,7 +18,7 @@ class Model:
             with open(path,"rb") as fp:
                 model=pkl.load(fp)
                 def predict_ski(input_vec):
-                    vec=np.array(input_vec).reshape((1,-1))
+                    vec=np.array(input_vec)
                     return model.predict(vec)
                      
                 return predict_ski

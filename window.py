@@ -18,9 +18,10 @@ class Window(tk.Tk):
         self.Control=ControlPanel(self,"ControlFrame",height=self.__window_height*0.2,width=self.__window_width*0.1)
         self.Control.grid(row=0,column=1,sticky = tk.W+tk.E+tk.N+tk.S)
         
-        
-        self.Graphs=GraphPanel(self,"GraphPanel",height=int(self.__window_height*0.9),width=self.__window_width*0.1)
-        self.Graphs.grid(row=2,column=0,sticky = tk.W+tk.N+tk.S)
+        frame=tk.Frame(self,height=int(self.__window_height*0.9),width=self.__window_width*0.1)
+        frame.grid(row=2,column=0,sticky = tk.W+tk.N+tk.S)
+        # self.Graphs=GraphPanel(self,"GraphPanel",height=int(self.__window_height*0.9),width=self.__window_width*0.1)
+        # self.Graphs.grid(row=2,column=0,sticky = tk.W+tk.N+tk.S)
         
         self.Output=OutputPanel(self,"OutputPanel",height=int(self.__window_height*0.9),width=self.__window_width*0.02)
         self.Output.grid(row=2,column=1,sticky = tk.W+tk.N+tk.S)
@@ -52,6 +53,8 @@ class Window(tk.Tk):
     
     def update_custom_input(self,row):
         self.Control.update_custom_input(row)
+    def return_dataset(self):
+        return self.Output.return_dataset()
     
 
 
